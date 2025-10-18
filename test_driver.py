@@ -6,22 +6,21 @@ from Servo import Servo
 driver = PCADriver(address=0x40, freq=50)
 
 try:
-    # Création de quelques servos (par exemple sur les 3 premiers canaux)
-    servo1 = Servo(driver, channel=0)
-    servo2 = Servo(driver, channel=15)
+    print("Test PWM direct sur canal 0...")
+    # Position neutre (90°)
+    driver.set_pwm_duty(0, 7.5)  # ~1.5ms
+    print("Position neutre (90°) - pause 2s")
+    sleep(2)
     
-    print("Test de mouvement des servos... (Ctrl+C pour arrêter)")
-    while True:
-        for angle in range(0, 181, 10):
-            servo1.set_angle(angle)
-            servo2.set_angle(180 - angle)
-            sleep(0.05)
-        for angle in range(180, -1, -10):
-            servo1.set_angle(angle)
-            servo2.set_angle(180 - angle)
-            sleep(0.05)
-except KeyboardInterrupt:
-    print("\nArrêt du test...")
+    # Position min (0°)
+    driver.set_pwm_duty(0, 2.5)  # ~0.5ms
+    print("Position min (0°) - pause 2s")
+    sleep(2)
+    
+    # Position max (180°)
+    driver.set_pwm_duty(0, 12.5)  # ~2.5ms
+    print("Position max (180°) - pause 2s")
+    sleep(2)
+    
 finally:
     driver.close()
-    print("Ressources libérées")
