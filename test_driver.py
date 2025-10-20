@@ -29,6 +29,8 @@ sleep(3)
 for servo in servos:
     if servo.channel_info()%4 == 1:
         servo.set_angle(80)
+        sleep(0.1)
+        servo.set_angle(70)
 
         
         
