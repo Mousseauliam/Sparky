@@ -7,37 +7,28 @@ print("=== Test Servo Canal 13 ===\n")
 # Test connexion I2C
 try:
     driver = PCADriver(address=0x40, freq=50)
-    servo13 = Servo(driver, channel=13, min_us=500, max_us=2500, freq=50)
-    print("✅ PCA9685 initialisé à 0x40")
-    print("✅ Servo sur canal 13 configuré")
 except Exception as e:
     print(f"❌ Erreur d'initialisation: {e}")
     exit(1)
 
-try:
-    print("\n--- Balayage 0° → 180° sur canal 13 ---")
-    
-    # Balayage lent de 0° à 180°
-    for angle in range(0, 181, 10):
-        servo13.set_angle(angle)
-        print(f"Angle: {angle}°")
-        sleep(0.5)
-    
-    print("\n--- Retour 180° → 0° ---")
-    
-    # Retour de 180° à 0°
-    for angle in range(180, -1, -10):
-        servo13.set_angle(angle)
-        print(f"Angle: {angle}°")
-        sleep(0.5)
-    
-    print("\n✅ Test terminé")
-    
-except KeyboardInterrupt:
-    print("\n\n⚠️ Test interrompu")
-finally:
-    servo13.set_angle(90)  # Position neutre
-    sleep(0.5)
-    driver.set_pwm(13, 0, 0)  # Éteindre le signal
-    driver.close()
-    print("Ressources libérées")
+servo0 = Servo(driver, channel=0)
+servo1 = Servo(driver, channel=1)
+servo2 = Servo(driver, channel=2)
+servo4 = Servo(driver, channel=4)
+servo5 = Servo(driver, channel=5)
+servo6 = Servo(driver, channel=6)
+servo8 = Servo(driver, channel=8)
+servo9 = Servo(driver, channel=9)
+servo10 = Servo(driver, channel=10)
+
+servos = [servo0, servo1, servo2, servo4, servo5, servo6, servo8, servo9, servo10]
+
+for servo in servos:
+    servo.neutral()
+    if servo.channel_info()%4 == 0:
+        print(servo.channel_info())
+        
+        
+driver.close()
+sleep(0.5)
+print("Ressources libérées")

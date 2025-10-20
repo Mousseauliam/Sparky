@@ -15,3 +15,11 @@ class Servo:
         pulse_us = self.min_us + (self.max_us - self.min_us) * (angle / 180.0)
         duty = (pulse_us / self.period_us) * 100
         self.driver.set_pwm_duty(self.channel, duty)
+        
+    def neutral(self):
+        """Positionne le servo à l’angle neutre (90°)"""
+        self.set_angle(90)
+        
+    def channel_info(self):
+        """Retourne les informations du servo"""
+        return self.channel
