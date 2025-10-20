@@ -37,6 +37,10 @@ for servo in servos:
         
 sleep(3)
 
+for servo in servos:
+    if servo.channel_info() % 4 == 1:
+        servo.set_angle(70)
+
 driver1.close()
 driver2.close()
 sleep(0.5)
