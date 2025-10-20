@@ -2,8 +2,6 @@ from PCADriver import PCADriver
 from Servo import Servo
 from time import sleep
 
-print("=== Test Servo Canal 13 ===\n")
-
 # Test connexion I2C
 try:
     driver = PCADriver(address=0x40, freq=50)
@@ -25,10 +23,15 @@ servos = [servo0, servo1, servo2, servo4, servo5, servo6, servo8, servo9, servo1
 
 for servo in servos:
     servo.neutral()
+        
+sleep(3)
+
+for servo in servos:
     if servo.channel_info()%4 == 0:
-        print(servo.channel_info())
+        servo.set_angle(80)
+
         
         
 driver.close()
-sleep(0.5)
+sleep(0.5)  
 print("Ressources libérées")
