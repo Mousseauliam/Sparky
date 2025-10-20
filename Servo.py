@@ -22,4 +22,4 @@ class Servo:
         
     def channel_info(self):
         """Retourne les informations du servo"""
-        return self.channel
+        return self.channel, 
