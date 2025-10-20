@@ -26,12 +26,6 @@ for servo in servos:
         
 sleep(3)
 
-for servo in servos:
-    if servo.channel_info()%4 == 0:
-        servo.set_angle(80)
-        sleep(0.1)
-        servo.set_angle(70)
-
         
         
 driver.close()
