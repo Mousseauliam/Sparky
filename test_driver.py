@@ -4,7 +4,7 @@ from time import sleep
 
 # Test connexion I2C
 try:
-    driver = PCADriver(address=0x70, freq=50)
+    driver = PCADriver(address=0x41, freq=50)
 except Exception as e:
     print(f"❌ Erreur d'initialisation: {e}")
     exit(1)
