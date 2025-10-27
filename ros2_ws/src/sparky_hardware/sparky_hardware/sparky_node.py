@@ -60,7 +60,7 @@ class SparkyHardwareNode(Node):
         # Position neutre au démarrage (un par un pour éviter saturation I2C)
         self.get_logger().info('📍 Mise en position neutre (un par un)...')
         for i, servo in enumerate(self.servos):
-            servo.neutral(speed=None)  # ✅ Sans interpolation pour aller plus vite
+            servo.set_angle(90.0, speed=None)  # ✅ speed=None = mouvement instantané
             sleep(0.01)  # 10ms entre chaque servo
         
         self.get_logger().info('⏳ Attente stabilisation...')
