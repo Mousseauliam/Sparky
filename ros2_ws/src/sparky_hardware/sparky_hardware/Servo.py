@@ -1,7 +1,7 @@
 from time import sleep
 
 class Servo:
-    def __init__(self, driver, channel, min_pulse=150, max_pulse=600, default_angle=90):
+    def __init__(self, driver, channel, min_pulse=500, max_pulse=2500, default_angle=90):
         """
         Initialise un servo
         
