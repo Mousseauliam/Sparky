@@ -16,7 +16,7 @@ class Servo:
         self.channel = channel
         self.min_pulse = min_pulse
         self.max_pulse = max_pulse
-        self.current_angle = float(default_angle)  # ✅ Forcer en float
+        self.current_angle = float(default_angle)
         
         # Définir l'angle initial (sans interpolation au démarrage)
         self._set_angle_immediate(default_angle)
@@ -33,9 +33,13 @@ class Servo:
     
     def _set_angle_immediate(self, angle):
         """Définit l'angle immédiatement (sans interpolation)"""
-        pulse = self._angle_to_pulse(angle)
-        self.driver.set_pwm(self.channel, 0, pulse)
-        self.current_angle = float(angle)  # ✅ Forcer en float
+        try:
+            pulse = self._angle_to_pulse(angle)
+            self.driver.set_pwm(self.channel, 0, pulse)
+            self.current_angle = float(angle)
+            sleep(0.001)  # ✅ Petit délai de 1ms pour laisser l'I2C respirer
+        except OSError as e:
+            print(f"⚠️ Erreur I2C servo {self.channel}: {e}")
     
     def set_angle(self, angle, speed=None):
         """
@@ -72,17 +76,24 @@ class Servo:
         step_angle = 1.0 if diff > 0 else -1.0
         delay = 1.0 / speed  # Délai entre chaque degré
         
-        # Interpolation linéaire
-        for i in range(steps):
-            self.current_angle += step_angle
-            pulse = self._angle_to_pulse(self.current_angle)
-            self.driver.set_pwm(self.channel, 0, pulse)
-            sleep(delay)
+        # ✅ Ajouter un délai minimum pour protéger l'I2C
+        delay = max(delay, 0.002)  # Minimum 2ms entre chaque commande
         
-        # S'assurer qu'on atteint exactement l'angle cible
-        self.current_angle = float(target_angle)  # ✅ Forcer en float
-        pulse = self._angle_to_pulse(target_angle)
-        self.driver.set_pwm(self.channel, 0, pulse)
+        # Interpolation linéaire
+        try:
+            for i in range(steps):
+                self.current_angle += step_angle
+                pulse = self._angle_to_pulse(self.current_angle)
+                self.driver.set_pwm(self.channel, 0, pulse)
+                sleep(delay)
+            
+            # S'assurer qu'on atteint exactement l'angle cible
+            self.current_angle = float(target_angle)
+            pulse = self._angle_to_pulse(target_angle)
+            self.driver.set_pwm(self.channel, 0, pulse)
+            
+        except OSError as e:
+            print(f"⚠️ Erreur I2C pendant interpolation servo {self.channel}: {e}")
     
     def neutral(self, speed=None):
         """Place le servo en position neutre (90°)"""
@@ -90,7 +101,7 @@ class Servo:
     
     def get_angle(self):
         """Retourne l'angle actuel du servo en float"""
-        return float(self.current_angle)  # ✅ Forcer en float
+        return float(self.current_angle)
     
     def channel_info(self):
         """Retourne les infos du canal"""

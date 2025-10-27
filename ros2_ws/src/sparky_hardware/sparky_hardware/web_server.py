@@ -34,24 +34,30 @@ class SparkyWebServer(Node):
         """Reçoit l'état des joints"""
         self.current_angles = list(msg.position)
     
-    def send_command(self, servo_id, angle):
-        """Envoie une commande pour un servo spécifique"""
+    def send_command(self, servo_id, angle, speed=100.0):
+        """
+        Envoie une commande pour un servo spécifique avec vitesse
+        
+        ✅ MODIFIÉ: N'envoie QUE l'angle du servo sélectionné pour éviter
+        de saturer le bus I2C en bougeant tous les servos en même temps
+        """
         if not (0 <= servo_id < 18):
             return False
         
         if not (0 <= angle <= 180):
             return False
         
-        # Créer un tableau avec les angles actuels
+        # ✅ Créer un tableau avec SEULEMENT le servo à bouger
+        # Les autres gardent leur position actuelle (pas de mouvement)
         angles = self.current_angles.copy()
         angles[servo_id] = float(angle)
         
-        # Publier la commande
+        # Publier la commande avec 19 éléments (18 angles + vitesse)
         msg = Float64MultiArray()
-        msg.data = angles
+        msg.data = angles + [float(speed)]
         self.cmd_pub.publish(msg)
         
-        self.get_logger().info(f'📤 Servo {servo_id} → {angle}°')
+        self.get_logger().info(f'📤 Servo {servo_id} → {angle}° @ {speed}°/sec')
         return True
 
 # Instance globale
@@ -64,7 +70,6 @@ class SparkyHTTPHandler(BaseHTTPRequestHandler):
     
     def do_GET(self):
         """Sert les fichiers statiques"""
-        # Chemin des fichiers statiques
         static_dir = os.path.join(os.path.dirname(__file__), 'static')
         
         if self.path == '/':
@@ -109,8 +114,9 @@ class SparkyHTTPHandler(BaseHTTPRequestHandler):
             
             servo_id = data.get('servo')
             angle = data.get('angle')
+            speed = data.get('speed', 100.0)
             
-            success = web_node.send_command(servo_id, angle)
+            success = web_node.send_command(servo_id, angle, speed)
             
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
@@ -119,7 +125,8 @@ class SparkyHTTPHandler(BaseHTTPRequestHandler):
             response = {
                 'status': 'ok' if success else 'error',
                 'servo': servo_id,
-                'angle': angle
+                'angle': angle,
+                'speed': speed
             }
             self.wfile.write(json.dumps(response).encode())
         else:

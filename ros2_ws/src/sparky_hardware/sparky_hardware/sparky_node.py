@@ -57,13 +57,14 @@ class SparkyHardwareNode(Node):
         
         self.get_logger().info(f'✅ {len(self.servos)} servos créés')
         
-        # Position neutre au démarrage avec vitesse lente
-        self.get_logger().info('📍 Mise en position neutre (vitesse lente)...')
-        for servo in self.servos:
-            servo.neutral(speed=50)  # 50°/sec = lent
+        # Position neutre au démarrage (un par un pour éviter saturation I2C)
+        self.get_logger().info('📍 Mise en position neutre (un par un)...')
+        for i, servo in enumerate(self.servos):
+            servo.neutral(speed=None)  # ✅ Sans interpolation pour aller plus vite
+            sleep(0.01)  # 10ms entre chaque servo
         
         self.get_logger().info('⏳ Attente stabilisation...')
-        sleep(2)
+        sleep(1)
         
         # Subscriber pour recevoir des commandes d'angles
         self.cmd_sub = self.create_subscription(
@@ -99,12 +100,18 @@ class SparkyHardwareNode(Node):
             self.get_logger().error(f'❌ Nombre d\'angles incorrect: {len(data)} (attendu: 18 ou 19)')
             return
         
-        # Appliquer les commandes avec la vitesse spécifiée
+        # ✅ Ne bouger QUE les servos dont l'angle a changé (tolérance de 1°)
+        changed_servos = []
         for i, angle in enumerate(angles):
             if i < len(self.servos):
-                self.servos[i].set_angle(float(angle), speed=speed)
+                current = self.servos[i].get_angle()
+                if abs(float(angle) - current) > 1.0:  # Changement > 1°
+                    self.servos[i].set_angle(float(angle), speed=speed)
+                    changed_servos.append(i)
+                    sleep(0.01)  # ✅ 10ms entre chaque servo pour éviter saturation I2C
         
-        self.get_logger().info(f'📤 Angles reçus: {[round(a, 1) for a in angles[:6]]}... @ {speed}°/sec')
+        if changed_servos:
+            self.get_logger().info(f'📤 Servos modifiés: {changed_servos} @ {speed}°/sec')
     
     def publish_states(self):
         """Publie l'état actuel des joints à 50Hz"""
@@ -112,7 +119,7 @@ class SparkyHardwareNode(Node):
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.name = [f'joint_{i}' for i in range(len(self.servos))]
         
-        # ✅ S'assurer que les positions sont des floats
+        # S'assurer que les positions sont des floats
         msg.position = [float(servo.get_angle()) for servo in self.servos]
         
         self.state_pub.publish(msg)
