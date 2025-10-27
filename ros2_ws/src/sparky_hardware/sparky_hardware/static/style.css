@@ -137,6 +137,37 @@ main {
     font-size: 1.2em;
 }
 
+/* Style pour l'input de vitesse */
+.form-group input[type="number"] {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1.1em;
+    background: white;
+    transition: border-color 0.3s;
+}
+
+.form-group input[type="number"]:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group input[type="number"]:hover {
+    border-color: #764ba2;
+}
+
+.speed-hint {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #f0f7ff;
+    border-left: 3px solid #667eea;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #555;
+}
+
 .btn-send {
     width: 100%;
     padding: 15px;

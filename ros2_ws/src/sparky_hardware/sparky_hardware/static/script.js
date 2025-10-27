@@ -6,6 +6,7 @@ let isConnected = false;
 const servoSelect = document.getElementById('servoSelect');
 const angleSlider = document.getElementById('angleSlider');
 const angleValue = document.getElementById('angleValue');
+const speedInput = document.getElementById('speedInput');
 const sendBtn = document.getElementById('sendBtn');
 const statusDiv = document.getElementById('status');
 const currentStateDiv = document.getElementById('currentState');
@@ -15,16 +16,29 @@ angleSlider.addEventListener('input', (e) => {
     angleValue.textContent = e.target.value;
 });
 
+// Validation de l'input vitesse
+speedInput.addEventListener('input', (e) => {
+    let value = parseInt(e.target.value);
+    
+    // Limiter la valeur entre 1 et 500
+    if (value < 1) {
+        e.target.value = 1;
+    } else if (value > 500) {
+        e.target.value = 500;
+    }
+});
+
 // Envoyer la commande au clic sur le bouton
 sendBtn.addEventListener('click', async () => {
     const servoId = parseInt(servoSelect.value);
     const angle = parseInt(angleSlider.value);
+    const speed = parseInt(speedInput.value) || 100; // Valeur par défaut si vide
     
-    await sendCommand(servoId, angle);
+    await sendCommand(servoId, angle, speed);
 });
 
 // Fonction pour envoyer une commande au serveur
-async function sendCommand(servoId, angle) {
+async function sendCommand(servoId, angle, speed) {
     try {
         const response = await fetch('/api/command', {
             method: 'POST',
@@ -33,14 +47,15 @@ async function sendCommand(servoId, angle) {
             },
             body: JSON.stringify({
                 servo: servoId,
-                angle: angle
+                angle: angle,
+                speed: speed
             })
         });
         
         const data = await response.json();
         
         if (data.status === 'ok') {
-            console.log(`✅ Servo ${servoId} → ${angle}°`);
+            console.log(`✅ Servo ${servoId} → ${angle}° @ ${speed}°/sec`);
             updateConnectionStatus(true);
             
             // Mettre à jour l'état local
@@ -111,4 +126,4 @@ setInterval(fetchState, 2000);
 // Récupérer l'état au chargement de la page
 fetchState();
 
-console.log('🚀 Interface Sparky chargée');
+console.log('🚀 Interface Sparky chargée avec contrôle de vitesse');
