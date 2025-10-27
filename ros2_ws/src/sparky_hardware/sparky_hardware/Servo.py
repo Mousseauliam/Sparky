@@ -16,10 +16,10 @@ class Servo:
         self.channel = channel
         self.min_pulse = min_pulse
         self.max_pulse = max_pulse
-        self.current_angle = default_angle
+        self.current_angle = float(default_angle)  # ✅ Forcer en float
         
-        # Définir l'angle initial
-        self.set_angle(default_angle)
+        # Définir l'angle initial (sans interpolation au démarrage)
+        self._set_angle_immediate(default_angle)
     
     def _angle_to_pulse(self, angle):
         """Convertit un angle (0-180°) en largeur d'impulsion"""
@@ -31,6 +31,12 @@ class Servo:
         pulse = int(self.min_pulse + (angle / 180.0) * (self.max_pulse - self.min_pulse))
         return pulse
     
+    def _set_angle_immediate(self, angle):
+        """Définit l'angle immédiatement (sans interpolation)"""
+        pulse = self._angle_to_pulse(angle)
+        self.driver.set_pwm(self.channel, 0, pulse)
+        self.current_angle = float(angle)  # ✅ Forcer en float
+    
     def set_angle(self, angle, speed=None):
         """
         Définit l'angle du servo avec contrôle de vitesse optionnel
@@ -40,10 +46,8 @@ class Servo:
             speed: Vitesse en degrés/seconde (None = instantané, ex: 50 = lent, 200 = rapide)
         """
         if speed is None:
-            # Mouvement instantané (ancien comportement)
-            pulse = self._angle_to_pulse(angle)
-            self.driver.set_pwm(self.channel, 0, pulse)
-            self.current_angle = angle
+            # Mouvement instantané
+            self._set_angle_immediate(angle)
         else:
             # Mouvement progressif
             self.move_smooth(angle, speed)
@@ -63,9 +67,9 @@ class Servo:
             # Déjà à la bonne position
             return
         
-        # Calculer le nombre d'étapes
+        # Calculer le nombre d'étapes (1 degré par étape)
         steps = int(abs(diff))
-        step_angle = 1 if diff > 0 else -1
+        step_angle = 1.0 if diff > 0 else -1.0
         delay = 1.0 / speed  # Délai entre chaque degré
         
         # Interpolation linéaire
@@ -76,17 +80,17 @@ class Servo:
             sleep(delay)
         
         # S'assurer qu'on atteint exactement l'angle cible
-        self.current_angle = target_angle
+        self.current_angle = float(target_angle)  # ✅ Forcer en float
         pulse = self._angle_to_pulse(target_angle)
         self.driver.set_pwm(self.channel, 0, pulse)
     
     def neutral(self, speed=None):
         """Place le servo en position neutre (90°)"""
-        self.set_angle(90, speed)
+        self.set_angle(90.0, speed)
     
     def get_angle(self):
-        """Retourne l'angle actuel du servo"""
-        return self.current_angle
+        """Retourne l'angle actuel du servo en float"""
+        return float(self.current_angle)  # ✅ Forcer en float
     
     def channel_info(self):
         """Retourne les infos du canal"""

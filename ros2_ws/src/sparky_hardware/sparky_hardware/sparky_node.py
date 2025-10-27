@@ -14,7 +14,7 @@ class SparkyHardwareNode(Node):
         self.get_logger().info('🚀 Initialisation de Sparky Hardware Node...')
         
         # Déclarer les paramètres configurables
-        self.declare_parameter('default_speed', 100.0)  # Vitesse par défaut en degrés/sec
+        self.declare_parameter('default_speed', 100.0)
         
         # Récupérer la vitesse configurée
         self.default_speed = self.get_parameter('default_speed').value
@@ -62,14 +62,8 @@ class SparkyHardwareNode(Node):
         for servo in self.servos:
             servo.neutral(speed=50)  # 50°/sec = lent
         
-        self.get_logger().info('⏳ Attente 3 secondes...')
-        sleep(3)
-        
-        # Test: servos canaux 0,4,8 à 70° avec vitesse moyenne
-        self.get_logger().info('🔧 Test: servos canaux 0,4,8 à 70° (vitesse moyenne)')
-        for servo in self.servos:
-            if servo.channel_info()[0] % 4 == 0:
-                servo.set_angle(70, speed=100)  # 100°/sec = moyen
+        self.get_logger().info('⏳ Attente stabilisation...')
+        sleep(2)
         
         # Subscriber pour recevoir des commandes d'angles
         self.cmd_sub = self.create_subscription(
@@ -82,9 +76,6 @@ class SparkyHardwareNode(Node):
         # Publisher pour l'état des joints
         self.state_pub = self.create_publisher(JointState, 'joint_states', 10)
         self.create_timer(0.02, self.publish_states)  # 50Hz
-        
-        # État actuel des servos
-        self.current_angles = [servo.get_angle() for servo in self.servos]
         
         self.get_logger().info('🤖 Sparky Hardware Node prêt!')
         self.get_logger().info(f'⚙️ Vitesse par défaut: {self.default_speed}°/sec')
@@ -100,10 +91,10 @@ class SparkyHardwareNode(Node):
         # Vérifier si une vitesse est spécifiée (19ème élément)
         if len(data) == 19:
             angles = data[:18]
-            speed = data[18]
+            speed = float(data[18])
         elif len(data) == 18:
             angles = data
-            speed = self.default_speed
+            speed = float(self.default_speed)
         else:
             self.get_logger().error(f'❌ Nombre d\'angles incorrect: {len(data)} (attendu: 18 ou 19)')
             return
@@ -111,18 +102,19 @@ class SparkyHardwareNode(Node):
         # Appliquer les commandes avec la vitesse spécifiée
         for i, angle in enumerate(angles):
             if i < len(self.servos):
-                self.servos[i].set_angle(angle, speed=speed)
-                self.current_angles[i] = angle
+                self.servos[i].set_angle(float(angle), speed=speed)
         
-        self.get_logger().info(f'Angles reçus: {angles[:6]}... @ {speed}°/sec')
+        self.get_logger().info(f'📤 Angles reçus: {[round(a, 1) for a in angles[:6]]}... @ {speed}°/sec')
     
     def publish_states(self):
         """Publie l'état actuel des joints à 50Hz"""
         msg = JointState()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.name = [f'joint_{i}' for i in range(len(self.servos))]
-        # Mettre à jour avec les angles actuels des servos
-        msg.position = [servo.get_angle() for servo in self.servos]
+        
+        # ✅ S'assurer que les positions sont des floats
+        msg.position = [float(servo.get_angle()) for servo in self.servos]
+        
         self.state_pub.publish(msg)
     
     def destroy_node(self):
