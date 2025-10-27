@@ -27,19 +27,16 @@ class Servo:
             angle = 0
         elif angle > 180:
             angle = 180
-        
-        pulse = int(self.min_pulse + (angle / 180.0) * (self.max_pulse - self.min_pulse))
-        return pulse
+            
+        return int(self.min_pulse + (angle / 180.0) * (self.max_pulse - self.min_pulse))
     
     def _set_angle_immediate(self, angle):
         """Définit l'angle immédiatement (sans interpolation)"""
-        try:
-            pulse = self._angle_to_pulse(angle)
-            self.driver.set_pwm(self.channel, 0, pulse)
-            self.current_angle = float(angle)
-            sleep(0.001)  # Petit délai de 1ms pour laisser l'I2C respirer
-        except OSError as e:
-            print(f"⚠️ Erreur I2C servo {self.channel}: {e}")
+        pulse = self._angle_to_pulse(angle)
+        self.driver.set_pwm(self.channel, 0, pulse)
+        self.current_angle = float(angle)
+        sleep(0.001)  # Petit délai de 1ms pour laisser l'I2C respirer
+
     
     def set_angle(self, angle, speed=None):
         """
@@ -88,14 +85,10 @@ class Servo:
             for i in range(steps):
                 # ✅ Calculer l'angle intermédiaire basé sur start_angle
                 intermediate_angle = start_angle + (step_angle * (i + 1))
-                pulse = self._angle_to_pulse(intermediate_angle)
-                self.driver.set_pwm(self.channel, 0, pulse)
+                self._set_angle_immediate(intermediate_angle)
                 sleep(delay)
             
-            # ✅ À la fin, mettre l'angle exact et mettre à jour current_angle
-            pulse = self._angle_to_pulse(target_angle)
-            self.driver.set_pwm(self.channel, 0, pulse)
-            self.current_angle = target_angle  # ✅ Mise à jour SEULEMENT ici
+            self._set_angle_immediate(target_angle)
             
         except OSError as e:
             print(f"⚠️ Erreur I2C pendant interpolation servo {self.channel}: {e}")

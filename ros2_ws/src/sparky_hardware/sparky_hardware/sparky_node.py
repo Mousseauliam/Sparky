@@ -57,14 +57,6 @@ class SparkyHardwareNode(Node):
         
         self.get_logger().info(f'✅ {len(self.servos)} servos créés')
         
-        # Position neutre au démarrage avec vitesse lente
-        self.get_logger().info('📍 Mise en position neutre (vitesse lente)...')
-        for servo in self.servos:
-            servo.neutral()
-        
-        self.get_logger().info('⏳ Attente stabilisation...')
-        sleep(2)
-        
         # Subscriber pour recevoir des commandes d'angles
         self.cmd_sub = self.create_subscription(
             Float64MultiArray,
