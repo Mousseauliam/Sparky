@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Sparky Controller</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 Contrôle Sparky</h1>
+            <div class="status" id="status">● Déconnecté</div>
+        </header>
+
+        <main>
+            <div class="control-panel">
+                <div class="form-group">
+                    <label for="servoSelect">Servo :</label>
+                    <select id="servoSelect">
+                        <option value="0">Servo 0 (Patte 0 - Coxa)</option>
+                        <option value="1">Servo 1 (Patte 0 - Femur)</option>
+                        <option value="2">Servo 2 (Patte 0 - Tibia)</option>
+                        <option value="3">Servo 4 (Patte 1 - Coxa)</option>
+                        <option value="4">Servo 5 (Patte 1 - Femur)</option>
+                        <option value="5">Servo 6 (Patte 1 - Tibia)</option>
+                        <option value="6">Servo 8 (Patte 2 - Coxa)</option>
+                        <option value="7">Servo 9 (Patte 2 - Femur)</option>
+                        <option value="8">Servo 10 (Patte 2 - Tibia)</option>
+                        <option value="9">Servo 12 (Patte 3 - Coxa)</option>
+                        <option value="10">Servo 13 (Patte 3 - Femur)</option>
+                        <option value="11">Servo 14 (Patte 3 - Tibia)</option>
+                        <option value="12">Servo 16 (Patte 4 - Coxa)</option>
+                        <option value="13">Servo 17 (Patte 4 - Femur)</option>
+                        <option value="14">Servo 18 (Patte 4 - Tibia)</option>
+                        <option value="15">Servo 20 (Patte 5 - Coxa)</option>
+                        <option value="16">Servo 21 (Patte 5 - Femur)</option>
+                        <option value="17">Servo 22 (Patte 5 - Tibia)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="angleSlider">
+                        Angle : <span id="angleValue">90</span>°
+                    </label>
+                    <input 
+                        type="range" 
+                        id="angleSlider" 
+                        min="0" 
+                        max="180" 
+                        value="90"
+                        step="1"
+                    >
+                    <div class="slider-labels">
+                        <span>0°</span>
+                        <span>90°</span>
+                        <span>180°</span>
+                    </div>
+                </div>
+
+                <button id="sendBtn" class="btn-send">
+                    📤 Envoyer
+                </button>
+            </div>
+
+            <div class="info-panel">
+                <h3>État actuel</h3>
+                <div id="currentState">
+                    <p>En attente de données...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
