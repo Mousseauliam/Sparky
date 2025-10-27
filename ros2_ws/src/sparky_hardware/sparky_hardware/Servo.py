@@ -97,7 +97,7 @@ class Servo:
     
     def neutral(self, speed=None):
         """Place le servo en position neutre (90°)"""
-        self._set_angle_immediate(90.0, speed)
+        self._set_angle_immediate(90.0)
     
     def get_angle(self):
         """Retourne l'angle actuel du servo en float"""
