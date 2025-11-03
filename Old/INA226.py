@@ -37,5 +37,5 @@ class INA226:
 # Test
 if __name__ == '__main__':
     ina = INA226()
-    print(f"Tension: {ina.get_voltage():.2f} V")
+    print(f"Tension: {ina.get_voltage():.8f} V")
     ina.close()
