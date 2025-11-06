@@ -127,3 +127,6 @@ setInterval(fetchState, 2000);
 fetchState();
 
 console.log('🚀 Interface Sparky chargée avec contrôle de vitesse');
+
+// ancien : topicCmd = new ROSLIB.Topic({ ros: ros, name: '/cmd_mvt', messageType: 'geometry_msgs/Twist' });
+var topicCmd = new ROSLIB.Topic({ ros: ros, name: '/cmd_mvt', messageType: 'geometry_msgs/Twist' });
